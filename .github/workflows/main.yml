@@ -46,7 +46,7 @@ jobs:
 
       - name: install imandrax
         run: |
-          sh -c "$(curl -fsSL https://storage.googleapis.com/imandra-prod-imandrax-releases/install.sh)" -- -y
+          sh -c "$(curl -fsSL https://imandra.ai/get-imandrax.sh)" -- -y
           mkdir -p ~/.config/imandrax
           touch ~/.config/imandrax/api_key
           printf '%s' ${{ secrets.IU_API_KEY }} > ~/.config/imandrax/api_key
