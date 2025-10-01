@@ -10,7 +10,7 @@
     "theme": "dark"
   },
   "license": "MIT",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "repository": {
     "type": "git",
     "url": "https://github.com/imandra-ai/imandrax-vscode"
@@ -111,6 +111,12 @@
           "type": "boolean",
           "default": false,
           "description": "Show proven goals in goal state."
+        },
+        "imandrax.largeDecompConfirmation": {
+          "scope": "window",
+          "type": "integer",
+          "default": 1000,
+          "description": "Controls the minimum number of decomposition regions before asking for confirmation when opening a visualization."
         }
       }
     },
