@@ -79,18 +79,44 @@ interface Decomp {
 }
 
 
-export function visualize_decomp(extensionUri: Uri, params: { decomps: Decomp[] }) {
-	const decomps = params.decomps;
+  const config = workspace.getConfiguration("imandrax");
 
-	let body = "";
-	const sources: string[] = [];
+  const decomps = params.decomps;
 
-	for (const d of decomps) {
-		const source = d.source;
-		body += `<h1>Decomposition of <span class="code">${source}</span></h1>`;
-		body += d.decomp;
-		sources.push(source);
-	}
+  let body = "";
+  const sources: string[] = [];
+
+  let total_regions = 0;
+  for (const d of decomps) {
+    if ("num_regions" in d)
+      total_regions += d.num_regions;
+  }
+
+  let do_display = true;
+
+  if (total_regions > config.largeDecompConfirmation) {
+    const q = await window.showWarningMessage(
+      `This decomposition is not displayed in the editor because it is very large (${total_regions} regions).`,
+      {},
+      { title: "Open Anyway" },
+      { title: "Cancel", isCloseAffordance: true },
+      { title: "Configure Limit" });
+
+    do_display = q !== undefined && q.title == "Open Anyway";
+
+    if (q && q.title == "Configure Limit")
+      commands.executeCommand("workbench.action.openSettings", "imandrax.largeDecompConfirmation");
+  }
+
+  if (!do_display)
+    return;
+
+  for (const d of decomps) {
+    const source = d.source;
+    body += `<h1>Decomposition of <span class="code">${source}</span></h1>`;
+    body += d.decomp;
+    sources.push(source);
+  }
 
 	const sources_str = sources.join(", ");
 
