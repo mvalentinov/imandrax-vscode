@@ -78,7 +78,6 @@ interface Decomp {
   num_regions: number // Number of regions
 }
 
-
 export async function visualize_decomp(extensionUri: Uri, params: { decomps: Decomp[] }) {
   const config = workspace.getConfiguration("imandrax");
 
