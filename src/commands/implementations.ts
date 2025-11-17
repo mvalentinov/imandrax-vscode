@@ -78,77 +78,57 @@ interface Decomp {
   num_regions: number // Number of regions
 }
 
-export async function visualize_decomp(extensionUri: Uri, params: { decomps: Decomp[] }) {
-  const config = workspace.getConfiguration("imandrax");
 
-  const decomps = params.decomps;
+export function visualize_decomp(extensionUri: Uri, params: { decomps: Decomp[] }) {
+	const decomps = params.decomps;
 
-  let body = "";
-  const sources: string[] = [];
+	let body = "";
+	const sources: string[] = [];
 
-  let total_regions = 0;
-  for (const d of decomps) {
-    if ("num_regions" in d)
-      total_regions += d.num_regions;
-  }
+	for (const d of decomps) {
+		const source = d.source;
+		body += `<h1>Decomposition of <span class="code">${source}</span></h1>`;
+		body += d.decomp;
+		sources.push(source);
+	}
 
-  let do_display = true;
+	const sources_str = sources.join(", ");
 
-  if (total_regions > config.largeDecompConfirmation) {
-    const q = await window.showWarningMessage(
-      `This decomposition is not displayed in the editor because it is very large (${total_regions} regions).`,
-      {},
-      { title: "Open Anyway" },
-      { title: "Cancel", isCloseAffordance: true },
-      { title: "Configure Limit" });
+	const panel = window.createWebviewPanel("imandrax-decomp", `Decomposition of ${sources_str}`, ViewColumn.One, {
+		enableScripts: true, localResourceRoots: [
+			Uri.joinPath(extensionUri, "assets")
+		],
+		enableCommandUris: true,
+	});
 
-    do_display = q !== undefined && q.title == "Open Anyway";
+  const pwv = panel.webview;
+	const assets_path = Uri.joinPath(extensionUri, "assets");
+	const voronoi_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "voronoi.js")).toString();
+	const imandrax_hydrate_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "imandrax-hydrate.js")).toString();
+	const style1_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "decomp-style.css")).toString();
+	const style2_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "styles.b466ce6f.css")).toString();
+	const style3_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "style.min.98373da4.css")).toString();
 
-    if (q && q.title == "Configure Limit")
-      commands.executeCommand("workbench.action.openSettings", "imandrax.largeDecompConfirmation");
-  }
 
-  if (!do_display)
-    return;
-
-  for (const d of decomps) {
-    const source = d.source;
-    body += `<h1>Decomposition of <span class="code">${source}</span></h1>`;
-    body += d.decomp;
-    sources.push(source);
-  }
-
-  const sources_str = sources.join(", ");
-
-  const panel = window.createWebviewPanel("imandrax-decomp", `Decomposition of ${sources_str}`, ViewColumn.One, {
-    enableScripts: true, localResourceRoots: [
-      Uri.joinPath(extensionUri, "assets")
-    ],
-    enableCommandUris: true,
-  });
-
-  const style_path = Uri.joinPath(extensionUri, "assets", "decomp-style.css");
-  const style_uri = panel.webview.asWebviewUri(style_path);
-
-  const voronoi_path = Uri.joinPath(extensionUri, "assets", "voronoi.js");
-  const voronoi_uri = panel.webview.asWebviewUri(voronoi_path);
-
-  const html = `
+	const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="${style_uri.toString()}">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-  <script src="${voronoi_uri.toString()}"></script>
+  <link rel="stylesheet" href="${style1_uri}">
+  <link rel="stylesheet" href="${style2_uri}">
+  <link rel="stylesheet" href="${style3_uri}">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+	<script src="${voronoi_uri}"></script>
+	<script src="${imandrax_hydrate_uri}"></script>
 </head>
-<body>
+<body style="background-color: transparent;">
 ${body}
 </body>
 </html>`;
 
-  // console.log(`DECOMP HTML: ${html}`);
+	// console.log(`DECOMP HTML: ${html}`);
 
-  panel.webview.html = html;
+	panel.webview.html = html;
 }
 
 export async function checkAll(getClient: () => LanguageClient) {
