@@ -118,25 +118,25 @@ export async function visualize_decomp(extensionUri: Uri, params: { decomps: Dec
     sources.push(source);
   }
 
-	const sources_str = sources.join(", ");
+  const sources_str = sources.join(", ");
 
-	const panel = window.createWebviewPanel("imandrax-decomp", `Decomposition of ${sources_str}`, ViewColumn.One, {
-		enableScripts: true, localResourceRoots: [
-			Uri.joinPath(extensionUri, "assets")
-		],
-		enableCommandUris: true,
-	});
+  const panel = window.createWebviewPanel("imandrax-decomp", `Decomposition of ${sources_str}`, ViewColumn.One, {
+    enableScripts: true, localResourceRoots: [
+      Uri.joinPath(extensionUri, "assets")
+    ],
+    enableCommandUris: true,
+  });
 
   const pwv = panel.webview;
-	const assets_path = Uri.joinPath(extensionUri, "assets");
-	const voronoi_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "voronoi.js")).toString();
-	const imandrax_hydrate_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "imandrax-hydrate.js")).toString();
-	const style1_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "decomp-style.css")).toString();
-	const style2_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "styles.b466ce6f.css")).toString();
-	const style3_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "style.min.98373da4.css")).toString();
+  const assets_path = Uri.joinPath(extensionUri, "assets");
+  const voronoi_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "voronoi.js")).toString();
+  const imandrax_hydrate_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "imandrax-hydrate.js")).toString();
+  const style1_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "decomp-style.css")).toString();
+  const style2_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "styles.b466ce6f.css")).toString();
+  const style3_uri = pwv.asWebviewUri(Uri.joinPath(assets_path, "style.min.98373da4.css")).toString();
 
 
-	const html = `
+  const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -152,9 +152,9 @@ ${body}
 </body>
 </html>`;
 
-	// console.log(`DECOMP HTML: ${html}`);
+  // console.log(`DECOMP HTML: ${html}`);
 
-	panel.webview.html = html;
+  panel.webview.html = html;
 }
 
 export async function checkAll(getClient: () => LanguageClient) {
