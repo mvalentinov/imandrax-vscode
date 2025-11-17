@@ -79,6 +79,7 @@ interface Decomp {
 }
 
 
+export async function visualize_decomp(extensionUri: Uri, params: { decomps: Decomp[] }) {
   const config = workspace.getConfiguration("imandrax");
 
   const decomps = params.decomps;
