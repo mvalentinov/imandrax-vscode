@@ -15,6 +15,14 @@ To use the ImandraX extension, an `imandrax-cli` binary must be in your `PATH`. 
 missing, this extension will prompt you to install it. It will effectively run the script from
 http://imandra.ai/get-imandrax.sh with all of the default options.
 
+### Updating ImandraX
+
+If you need to reinstall or update ImandraX, you can run the following command:
+
+```sh
+sh -c "$(curl -fsSL https://imandra.ai/get-imandrax.sh)"
+```
+
 ### Supported platforms
 
 ImandraX is currently supported on MacOS, Linux, and Windows via WSL.
