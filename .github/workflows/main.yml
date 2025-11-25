@@ -86,3 +86,8 @@ jobs:
           pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
           registryUrl: https://marketplace.visualstudio.com
           extensionFile: imandrax-${{ env.VERSION }}.vsix
+
+      - name: Publish to Open-VSX
+        run: |
+          npm install ovsx
+          npx ovsx publish imandrax-${{ env.VERSION }}.vsix -p ${{ secrets.VS_MARKETPLACE_TOKEN }}
