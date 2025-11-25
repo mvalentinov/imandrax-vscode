@@ -90,4 +90,4 @@ jobs:
       - name: Publish to Open-VSX
         run: |
           npm install ovsx
-          npx ovsx publish imandrax-${{ env.VERSION }}.vsix -p ${{ secrets.VS_MARKETPLACE_TOKEN }}
+          npx ovsx publish imandrax-${{ env.VERSION }}.vsix -p ${{ secrets.OPENVSX_TOKEN }}
