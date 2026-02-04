@@ -25,19 +25,6 @@ export async function activate(context: ExtensionContext) {
 
   if (imandraxLanguageClient.configuration.isFoundPath(languageClientConfig)) {
 
-    Promise.all([installer.checkVersion(), installer.checkForMarker()])
-      .then(([versionOutdated, installedByVscode]) => {
-        if (versionOutdated && installedByVscode) {
-          console.log('ImandraX binary is outdated, updating...');
-          const args = { revealSetting: { key: "imandrax.lsp.binary", edit: true } };
-          const openUri = Uri.parse(
-            `command:workbench.action.openWorkspaceSettingsFile?${encodeURIComponent(JSON.stringify(args))}`
-          );
-          void installer.promptToInstall(openUri, true);
-        }
-      })
-      .catch(err => console.error('Version check failed:', err));
-
     const languageClientWrapper_ = new imandraxLanguageClient.ImandraXLanguageClient(getConfig);
     const getClient: () => LanguageClient = () => { return languageClientWrapper_.getClient(); };
 
@@ -62,6 +49,7 @@ export async function activate(context: ExtensionContext) {
     if (context.extensionMode === ExtensionMode.Test || context.extensionMode === undefined) {
       (global as any).testLanguageClientWrapper = languageClientWrapper_;
     }
+
   }
   else if (languageClientConfig.binPathAvailability.status === "missingPath") {
     const args = { revealSetting: { key: "imandrax.lsp.binary", edit: true } };
@@ -79,4 +67,17 @@ export async function activate(context: ExtensionContext) {
   if (context.extensionMode === ExtensionMode.Test || context.extensionMode === undefined) {
     (global as any).testExtensionContext = context;
   }
+
+  Promise.all([installer.checkVersion(), installer.checkForMarker()])
+      .then(([versionOutdated, installedByVscode]) => {
+        if (versionOutdated && installedByVscode) {
+          console.log('ImandraX binary is outdated, updating...');
+          const args = { revealSetting: { key: "imandrax.lsp.binary", edit: true } };
+          const openUri = Uri.parse(
+            `command:workbench.action.openWorkspaceSettingsFile?${encodeURIComponent(JSON.stringify(args))}`
+          );
+          void installer.promptToInstall(openUri, true);
+        }
+      })
+      .catch(err => console.error('Version check failed:', err));
 }
