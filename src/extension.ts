@@ -26,14 +26,14 @@ export async function activate(context: ExtensionContext) {
   if (imandraxLanguageClient.configuration.isFoundPath(languageClientConfig)) {
 
     Promise.all([installer.checkVersion(), installer.checkForMarker()])
-      .then(async ([versionOutdated, installedByVscode]) => {
+      .then(([versionOutdated, installedByVscode]) => {
         if (versionOutdated && installedByVscode) {
           console.log('ImandraX binary is outdated, updating...');
           const args = { revealSetting: { key: "imandrax.lsp.binary", edit: true } };
           const openUri = Uri.parse(
             `command:workbench.action.openWorkspaceSettingsFile?${encodeURIComponent(JSON.stringify(args))}`
           );
-          await installer.promptToInstall(openUri, true);
+          void installer.promptToInstall(openUri, true);
         }
       })
       .catch(err => console.error('Version check failed:', err));
