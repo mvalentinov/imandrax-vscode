@@ -157,7 +157,7 @@ export async function promptToInstall(openUri: Uri, update?: boolean) {
   const items: readonly MessageItem[] = [launchInstallerItem];
   let itemT: MessageItem | undefined;
   if (update) {
-    itemT = await window.showInformationMessage(`An updated imandrax-cli binary is available.`, ...items);
+    itemT = await window.showInformationMessage(`An updated imandrax-cli binary is available.`, { modal: false }, ...items);
   } else {
     itemT = await window.showErrorMessage(`Could not find ImandraX. Please install it or ensure the imandrax-cli binary is in your PATH or its location is set in [Workspace Settings](${openUri.toString()}).`, ...items);
   }
