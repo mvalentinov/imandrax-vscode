@@ -86,7 +86,6 @@ export async function activate(context: ExtensionContext) {
     (global as any).testExtensionContext = context;
   }
 
-
   void Promise.all([installer.checkVersion(), installer.checkForMarker()])
     .then(([versionOutdated, installedByVscode]) => {
       if (versionOutdated && installedByVscode) {
@@ -101,5 +100,4 @@ export async function activate(context: ExtensionContext) {
       }
     })
     .catch((err) => console.error("Version check failed:", err));
-
 }
