@@ -1,18 +1,28 @@
-import * as ApiKey from './api_key';
+import * as ApiKey from "./api_key";
 
-import * as Path from 'path';
+import * as Path from "path";
 import * as Which from "which";
 
-import { commands, ConfigurationTarget, env, MessageItem, ProgressLocation, QuickPickItem, QuickPickOptions, Uri, window, workspace } from "vscode";
-import { exec } from 'child_process';
+import {
+  commands,
+  ConfigurationTarget,
+  env,
+  MessageItem,
+  ProgressLocation,
+  QuickPickItem,
+  QuickPickOptions,
+  Uri,
+  window,
+  workspace,
+} from "vscode";
+import { exec } from "child_process";
 
-import { stat, writeFile } from 'fs/promises';
-
+import { stat, writeFile } from "fs/promises";
 
 async function getApiKeyInput() {
   const result = await window.showInputBox({
-    placeHolder: 'Paste your API key here',
-    ignoreFocusOut: true
+    placeHolder: "Paste your API key here",
+    ignoreFocusOut: true,
   });
 
   if (!result?.trim()) {
@@ -20,22 +30,28 @@ async function getApiKeyInput() {
   }
 
   await ApiKey.put(result.trim());
-  window.showInformationMessage('API key saved');
+  window.showInformationMessage("API key saved");
 }
 
 async function promptForApiKey() {
-  const options: QuickPickOptions = { title: 'Choose how to configure your API key', ignoreFocusOut: true };
+  const options: QuickPickOptions = {
+    title: "Choose how to configure your API key",
+    ignoreFocusOut: true,
+  };
 
   const existingApiKey: string | undefined = await ApiKey.get();
 
   // items
   const useExisting = { label: "Use already configured API key" };
-  const goToIu = { label: 'Go to Imandra Universe and obtain/copy an API key' };
-  const pasteNow = { label: "I've already copied my API key, let me paste it in" };
+  const goToIu = { label: "Go to Imandra Universe and obtain/copy an API key" };
+  const pasteNow = {
+    label: "I've already copied my API key, let me paste it in",
+  };
   const skip = { label: "Skip configuring API key for now" };
 
   // only show useExisting if one actually exists
-  const makeItems = (others: QuickPickItem[]) => (existingApiKey ? [useExisting] : []).concat(others);
+  const makeItems = (others: QuickPickItem[]) =>
+    (existingApiKey ? [useExisting] : []).concat(others);
 
   const items: readonly QuickPickItem[] = makeItems([goToIu, pasteNow, skip]);
 
@@ -43,7 +59,11 @@ async function promptForApiKey() {
 
   switch (itemT?.label) {
     case goToIu.label:
-      env.openExternal(await env.asExternalUri(Uri.parse("https://universe.imandra.ai/user/api-keys")));
+      env.openExternal(
+        await env.asExternalUri(
+          Uri.parse("https://universe.imandra.ai/user/api-keys"),
+        ),
+      );
       await getApiKeyInput();
       break;
     case pasteNow.label:
@@ -59,7 +79,10 @@ async function promptForApiKey() {
 async function promptToReloadWindow() {
   const reloadWindowItem = { title: "Reload window" } as const;
   const items: readonly MessageItem[] = [reloadWindowItem];
-  const itemT: MessageItem | undefined = await window.showInformationMessage("ImandraX installed!\nReload window to proceed", ...items);
+  const itemT: MessageItem | undefined = await window.showInformationMessage(
+    "ImandraX installed!\nReload window to proceed",
+    ...items,
+  );
 
   if (itemT?.title === reloadWindowItem.title) {
     commands.executeCommand("workbench.action.reloadWindow");
@@ -71,33 +94,37 @@ async function setBinaryPaths(openUri: Uri) {
   if (!homeDir) {
     window.showErrorMessage(
       `Could not determine your home directory. ` +
-      `Set 'lsp.binary' and 'terminal.binary' to the full path` +
-      `where imandrax-cli has been installed:\n` +
-      `[Workspace Settings](${openUri.toString()})`
+        `Set 'lsp.binary' and 'terminal.binary' to the full path` +
+        `where imandrax-cli has been installed:\n` +
+        `[Workspace Settings](${openUri.toString()})`,
     );
     return;
   }
 
-  const config = workspace.getConfiguration('imandrax');
-  const binaryPath = Path.join(homeDir, '.local', 'bin', 'imandrax-cli');
+  const config = workspace.getConfiguration("imandrax");
+  const binaryPath = Path.join(homeDir, ".local", "bin", "imandrax-cli");
 
-  await config.update('lsp.binary', binaryPath, ConfigurationTarget.Global);
-  await config.update('terminal.binary', binaryPath, ConfigurationTarget.Global);
+  await config.update("lsp.binary", binaryPath, ConfigurationTarget.Global);
+  await config.update(
+    "terminal.binary",
+    binaryPath,
+    ConfigurationTarget.Global,
+  );
 }
 
 async function markInstalled() {
-  const config = workspace.getConfiguration('imandrax');
-  const binaryPath = await config.get('lsp.binary');
+  const config = workspace.getConfiguration("imandrax");
+  const binaryPath = await config.get("lsp.binary");
   const binaryDir = Path.dirname(binaryPath as string);
-  const markerFile = Path.join(binaryDir, 'imandrax-cli.installed_by_vscode');
-  await writeFile(markerFile, '');
+  const markerFile = Path.join(binaryDir, "imandrax-cli.installed_by_vscode");
+  await writeFile(markerFile, "");
 }
 
 export async function checkForMarker() {
-  const config = workspace.getConfiguration('imandrax');
-  const binaryPath = await config.get('lsp.binary');
+  const config = workspace.getConfiguration("imandrax");
+  const binaryPath = await config.get("lsp.binary");
   const binaryDir = Path.dirname(binaryPath as string);
-  const markerFile = Path.join(binaryDir, 'imandrax-cli.installed_by_vscode');
+  const markerFile = Path.join(binaryDir, "imandrax-cli.installed_by_vscode");
   try {
     await stat(markerFile);
     return true;
@@ -113,7 +140,10 @@ async function handleSuccess(openUri: Uri) {
   await markInstalled();
 }
 
-async function runInstallerForUnix(itemT: MessageItem, title: string): Promise<void> {
+async function runInstallerForUnix(
+  itemT: MessageItem,
+  title: string,
+): Promise<void> {
   if (itemT.title === title) {
     return new Promise<void>((resolve, reject) => {
       const url = "https://imandra.ai/get-imandrax.sh";
@@ -122,32 +152,42 @@ async function runInstallerForUnix(itemT: MessageItem, title: string): Promise<v
         const wgetPath = Which.sync("wget", { nothrow: true });
         if (wgetPath !== "" && wgetPath !== null) {
           return "wget -qO-";
-        }
-        else {
+        } else {
           const curlPath = Which.sync("curl", { nothrow: true });
           if (curlPath !== "" && curlPath !== null) {
             return "curl -fsSL";
-          }
-          else {
-            reject(new Error(`Neither curl nor wget available for downloading the ImandraX installer.`));
+          } else {
+            reject(
+              new Error(
+                `Neither curl nor wget available for downloading the ImandraX installer.`,
+              ),
+            );
           }
         }
       };
 
-      const out = window.createOutputChannel('ImandraX installer', { log: true });
+      const out = window.createOutputChannel("ImandraX installer", {
+        log: true,
+      });
 
       const child = exec(`(set -e
         ${getCmdPrefix()} ${url} | sh -s -- -y);
         EC=$? && sleep .5 && exit $EC`);
 
       /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
-      child.stdout?.on('data', chunk => out.append(chunk.toString()));
-      child.stderr?.on('data', chunk => out.append(chunk.toString()));
+      child.stdout?.on("data", (chunk) => out.append(chunk.toString()));
+      child.stderr?.on("data", (chunk) => out.append(chunk.toString()));
       /* eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
-      child.on('close', code =>
-      (out.appendLine(`\n[installer exited with code ${code}]`),
-        (code === 0 ? (resolve()) : (reject(new Error(`Failed with code: ${code}`))))));
+      child.on(
+        "close",
+        (code) => (
+          out.appendLine(`\n[installer exited with code ${code}]`),
+          code === 0
+            ? resolve()
+            : reject(new Error(`Failed with code: ${code}`))
+        ),
+      );
     });
   }
 }
@@ -157,19 +197,31 @@ export async function promptToInstall(openUri: Uri, update?: boolean) {
   const items: readonly MessageItem[] = [launchInstallerItem];
   let itemT: MessageItem | undefined;
   if (update) {
-    itemT = await window.showInformationMessage(`An updated imandrax-cli binary is available.`, ...items);
+    itemT = await window.showInformationMessage(
+      `An updated imandrax-cli binary is available.`,
+      { modal: false },
+      ...items,
+    );
   } else {
-    itemT = await window.showErrorMessage(`Could not find ImandraX. Please install it or ensure the imandrax-cli binary is in your PATH or its location is set in [Workspace Settings](${openUri.toString()}).`, ...items);
+    itemT = await window.showErrorMessage(
+      `Could not find ImandraX. Please install it or ensure the imandrax-cli binary is in your PATH or its location is set in [Workspace Settings](${openUri.toString()}).`,
+      ...items,
+    );
   }
   if (itemT) {
-    await window.withProgress(
-      {
-        location: ProgressLocation.Notification,
-        title: "Installing ImandraX"
-      },
-      () => runInstallerForUnix(itemT, launchInstallerItem.title)).then(
+    await window
+      .withProgress(
+        {
+          location: ProgressLocation.Notification,
+          title: "Installing ImandraX",
+        },
+        () => runInstallerForUnix(itemT, launchInstallerItem.title),
+      )
+      .then(
         () => handleSuccess(openUri),
-        async (reason) => { await window.showErrorMessage(`ImandraX install failed\n ${reason}`); }
+        async (reason) => {
+          await window.showErrorMessage(`ImandraX install failed\n ${reason}`);
+        },
       );
   }
 }
@@ -185,7 +237,9 @@ interface ReleaseList {
 }
 
 export async function checkVersion() {
-  async function getFileModificationDate(filePath: string): Promise<Date | null> {
+  async function getFileModificationDate(
+    filePath: string,
+  ): Promise<Date | null> {
     try {
       const stats = await stat(filePath);
       return stats.mtime;
@@ -194,28 +248,31 @@ export async function checkVersion() {
       return null;
     }
   }
-  
+
   async function getData() {
-    const url = 'https://storage.googleapis.com/storage/v1/b/imandra-prod-imandrax-releases/o';
+    const url =
+      "https://storage.googleapis.com/storage/v1/b/imandra-prod-imandrax-releases/o";
     try {
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
       }
-  
-      return await response.json() as ReleaseList;
+
+      return (await response.json()) as ReleaseList;
     } catch (e) {
       console.error((e as Error).message);
     }
   }
-  
+
   const data = await getData();
-  const item = data?.items.find(item => item.name === "imandrax-macos-aarch64-latest.pkg");
+  const item = data?.items.find(
+    (item) => item.name === "imandrax-macos-aarch64-latest.pkg",
+  );
 
   const homeDir = process.env.HOME;
   if (!homeDir) {
     window.showErrorMessage(
-      `Could not determine your home directory. ` // +
+      `Could not determine your home directory. `, // +
       // `Set 'lsp.binary' and 'terminal.binary' to the full path` +
       // `where imandrax-cli has been installed:\n` +
       // `[Workspace Settings](${openUri.toString()})`
@@ -223,10 +280,12 @@ export async function checkVersion() {
     return false;
   }
 
-  const binaryPath = Path.join(homeDir, '.local', 'bin', 'imandrax-cli');
+  const binaryPath = Path.join(homeDir, ".local", "bin", "imandrax-cli");
 
-  const remoteGeneration = Number(item?.generation) / 1000
-  const localGeneration = Number((await getFileModificationDate(binaryPath))?.getTime() ?? 0);
+  const remoteGeneration = Number(item?.generation) / 1000;
+  const localGeneration = Number(
+    (await getFileModificationDate(binaryPath))?.getTime() ?? 0,
+  );
 
   return remoteGeneration > localGeneration;
 }
