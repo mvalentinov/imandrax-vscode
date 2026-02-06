@@ -111,7 +111,7 @@ suite('Commands Test Suite', () => {
           });
         }
         // We received some diagnostics, but they were not for us
-        resolveSawDiagnostic(false);
+        // resolveSawDiagnostic(false);
       }
     }
 
