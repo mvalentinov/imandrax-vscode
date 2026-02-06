@@ -25,18 +25,6 @@ export async function activate(context: ExtensionContext) {
 
   if (imandraxLanguageClient.configuration.isFoundPath(languageClientConfig)) {
 
-    const versionOutdated = await installer.checkVersion();
-    const installedByVscode = await installer.checkForMarker();
-
-    if (versionOutdated && installedByVscode) {
-      console.log('ImandraX binary is outdated, updating...');
-      const args = { revealSetting: { key: "imandrax.lsp.binary", edit: true } };
-      const openUri = Uri.parse(
-        `command:workbench.action.openWorkspaceSettingsFile?${encodeURIComponent(JSON.stringify(args))}`
-      );
-      await installer.promptToInstall(openUri, true);
-    }
-
     const languageClientWrapper_ = new imandraxLanguageClient.ImandraXLanguageClient(getConfig);
     const getClient: () => LanguageClient = () => { return languageClientWrapper_.getClient(); };
 
@@ -79,6 +67,7 @@ export async function activate(context: ExtensionContext) {
     (global as any).testExtensionContext = context;
   }
   if (context.extensionMode !== (ExtensionMode.Test || undefined)) {
+    console.log('Checking ImandraX binary version');
     const versionOutdated = await installer.checkVersion();
     const installedByVscode = await installer.checkForMarker();
 
